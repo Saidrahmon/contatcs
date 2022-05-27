@@ -6,7 +6,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(const TestForMultibloc());
+}
+
+class TestForMultibloc extends StatelessWidget {
+  const TestForMultibloc({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => ContactBloc()),
+      ],
+      child: const MyApp(),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -42,40 +56,35 @@ class _MyAppState extends State<MyApp> {
   //widgets
 
   Widget get view => BlocConsumer<ContactBloc, ContactState>(
-        listener: (BuildContext context, state) =>
-            contactListener(context, state),
-        builder: (context, state) {
-          if (state is InitialContactState) {
-            return Container();
-          }
-          if (state is LoadingContactState) {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (state is LoadedContactSate) {
-            return ListView(
-              children: state.contacts
-                  .map((e) => Container(
-                        child: Text(e.firstName),
-                      ))
-                  .toList(),
-            );
-          }
-          return Container();
-        },
-      );
+    listener: (BuildContext context, state) =>
+        contactListener(context, state),
+    builder: (context, state) {
+      if (state is InitialContactState) {
+        return Container();
+      }
+      if (state is LoadingContactState) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+      if (state is LoadedContactSate) {
+        return ListView(
+          children: state.contacts
+              .map((e) => Container(
+            child: Text(e.firstName),
+          ))
+              .toList(),
+        );
+      }
+      return Container();
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => ContactBloc()),
-      ],
-      child: MaterialApp(
-        home: Scaffold(
-          body: view,
-        ),
+    return MaterialApp(
+      home: Scaffold(
+        body: view,
       ),
     );
   }
