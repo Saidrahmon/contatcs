@@ -1,91 +1,20 @@
-import 'package:contacts_bloc/bloc/load_contact/contact_event.dart';
-import 'package:contacts_bloc/bloc/load_contact/contact_state.dart';
-import 'package:contacts_bloc/bloc/load_contact/load_contact_bloc.dart';
+import 'package:contacts_bloc/app.dart';
+import 'package:contacts_bloc/model/contact.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const TestForMultibloc());
+  await openBox();
+  runApp(const MyApp());
 }
 
-class TestForMultibloc extends StatelessWidget {
-  const TestForMultibloc({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => ContactBloc()),
-      ],
-      child: const MyApp(),
-    );
-  }
-}
-
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  //life cycles
-
-  @override
-  void initState() {
-    super.initState();
-    loadContacts();
-  }
-
-  //methods
-
-  void loadContacts() {
-    context.read<ContactBloc>().add(LoadContactsEvent());
-  }
-
-  //listeners
-
-  void contactListener(BuildContext context, ContactState state) {
-    if (state is LoadedContactSate) {
-      print("loaded -------------------");
-    }
-  }
-
-  //widgets
-
-  Widget get view => BlocConsumer<ContactBloc, ContactState>(
-    listener: (BuildContext context, state) =>
-        contactListener(context, state),
-    builder: (context, state) {
-      if (state is InitialContactState) {
-        return Container();
-      }
-      if (state is LoadingContactState) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-      if (state is LoadedContactSate) {
-        return ListView(
-          children: state.contacts
-              .map((e) => Container(
-            child: Text(e.firstName),
-          ))
-              .toList(),
-        );
-      }
-      return Container();
-    },
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: view,
-      ),
-    );
-  }
+Future openBox() async {
+  final appDocumentDirectory =
+      await path_provider.getApplicationDocumentsDirectory();
+  Hive.init(appDocumentDirectory.path);
+  Hive.registerAdapter(ContactAdapter());
+  //final box = await Hive.openBox<Contact>('contacts');
+  //return box;
 }

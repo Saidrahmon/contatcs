@@ -5,3 +5,5 @@ import 'package:flutter/material.dart';
 abstract class ContactEvent{}
 
 class LoadContactsEvent extends ContactEvent{}
+
+class AddContactEvent extends ContactEvent{}
